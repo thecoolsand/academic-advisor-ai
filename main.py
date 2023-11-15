@@ -1,1 +1,1 @@
-print("SUP WORLD")
+print("smth")
