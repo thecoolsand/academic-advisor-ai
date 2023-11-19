@@ -32,4 +32,9 @@ The API will return a file containing
 After each test, the AI will adjust the number of questions to be alloted to each topic. 
 Weak topics will be given more importance hence more questions from there and less from the strong topics.
 
-
+### Download and set up
+1. Clone the repository or just download the zip file
+2. Install dependencies with:  
+```pip install -r requirements.txt```
+3. run ```chainlit hello```
+4. server is hosted at ```localhost:8000```
