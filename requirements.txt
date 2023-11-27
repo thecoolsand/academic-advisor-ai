@@ -1,2 +1,7 @@
 streamlit~=1.12.0
 altair==4.0
+requests
+oauthlib
+python-dotenv
+pymongo
+PyPDF2
