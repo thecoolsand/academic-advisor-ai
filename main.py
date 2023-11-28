@@ -1,7 +1,35 @@
 import streamlit as st
-from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 import re
+import os
+from dotenv import load_dotenv
+from getpass import getpass
+
+from langchain.chains import LLMChain
+from langchain.llms import OpenAI
+from langchain.prompts import PromptTemplate
+
+
+# load_dotenv()
+
+# ---CONSTANTS----
+OPEN_AI_API_KEY = "YOUR_API_KEY_HERE"
+
+# ---CONSTANTS----
+
+q_a_dict_ai = {}
+q_a_dict_student = {}
+
+template = """Question: {question}
+
+Answer: Let's think step by step."""
+
+prompt = PromptTemplate(template=template, input_variables=["question"])
+llm = OpenAI(api_key=OPEN_AI_API_KEY)
+
+llm_chain = LLMChain(prompt=prompt, llm=llm)
+question = ""
+
 
 
 def get_pdf_text(pdf_docs):
@@ -14,12 +42,6 @@ def get_pdf_text(pdf_docs):
             text_array.append(page_obj.extract_text())
     return text_array
 
-# def get_text_chunks(text, ques_no):
-#     text_array = [text]
-#     text_array2 = []
-#     for i in range(ques_no):
-#         y = text_array[i].split(str(i+1), ques_no)
-
 
 def home():
     st.set_page_config(page_title="Eduboost", page_icon=":books:")
@@ -31,16 +53,21 @@ def home():
     if st.button("Process"):
         with st.spinner("Processing..."):
             raw_text = get_pdf_text(pdf_docs)
-            print(raw_text)
+            questions_student = []
+            answers_student = []
             for i in raw_text:
-                print(i)
-                text_chunks = re.split('\d+'+"."+"\n", i)
+                text_chunks = re.split('\d+' + "." + "\n", i)
                 text_chunks.pop(0)
                 text_chunks = [i.replace("\n", " ") for i in text_chunks]
-                print(text_chunks)
-                for j in text_chunks:
-                    st.write(j)
-                st.markdown("""---""")
+                if raw_text.index(i) == 0:
+                    for j in text_chunks:
+                        answers_student.append(j)
+                else:
+                    for j in text_chunks:
+                        questions_student.append(j)
+            for i in questions_student:
+                q_a_dict_student[i] = answers_student[questions_student.index(i)]
+        st.write(q_a_dict_student)
 
 
 if __name__ == "__main__":
