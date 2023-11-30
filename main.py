@@ -45,7 +45,11 @@ def home():
     with st.sidebar:
         st.subheader("Your documents")
         pdf_docs = st.file_uploader("Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
-    subject = st.radio(label="Choose your subject", options=["Physics", "Chemistry", "Biology", "Articial Intelligence (Code 417)", "Information Technology (Code 402)"])
+    subject = st.radio(label="Choose your subject", options=["Physics", "Chemistry", "Biology", "Articial "
+                                                                                                "Intelligence (Code "
+                                                                                                "417)", "Information "
+                                                                                                        "Technology ("
+                                                                                                        "Code 402)"])
     if st.button("Process"):
         with st.spinner("Processing..."):
             raw_text = [i.replace("\n", " ") for i in get_pdf_text(pdf_docs)]

@@ -5,3 +5,4 @@ oauthlib
 python-dotenv
 pymongo
 PyPDF2
+langchain

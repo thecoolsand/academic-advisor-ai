@@ -1,4 +1,13 @@
-# Academic Advisor Ai
+# Academic Advisor AI
+
+---
+### _Download and set up_
+1. Clone the repository or download the zip file
+2. Install dependencies with:  
+```pip install -r requirements.txt```
+3. run ```streamlit run main.py```
+4. server is hosted at ```localhost:8501```
+---
 
 ## Objective
 This repository is made for students, who want to self learn with the help of AI. This repository makes use of AI chat bots to generate and 
@@ -32,9 +41,4 @@ The API will return a file containing
 After each test, the AI will adjust the number of questions to be alloted to each topic. 
 Weak topics will be given more importance hence more questions from there and less from the strong topics.
 
-### Download and set up
-1. Clone the repository or just download the zip file
-2. Install dependencies with:  
-```pip install -r requirements.txt```
-3. run ```streamlit run main.py```
-4. server is hosted at ```localhost:8501```
+
