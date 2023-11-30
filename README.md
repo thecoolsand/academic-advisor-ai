@@ -13,14 +13,6 @@
 This repository is made for students, who want to self learn with the help of AI. This repository makes use of AI chat bots to generate and 
 evaluate tests and course plans according to student's needs. This can also be used by teachers in creating tests for classes.
 
-## Login
-**Needs to be updated**
-
-Three options will be provided after completion of login
-- Generate Tests
-- Evaluate Tests
-- Generate Course Plan
-
 ## Generate Tests
 After login, this is one of the three options avalible to the user. 
 When clicked will ask for the desired subject and on which topics of that subject. 
