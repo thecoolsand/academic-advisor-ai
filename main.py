@@ -14,7 +14,6 @@ from langchain.prompts import PromptTemplate
 
 # ---CONSTANTS----
 OPEN_AI_API_KEY = "YOUR_API_KEY_HERE"
-
 # ---CONSTANTS----
 
 q_a_dict_student = {}
