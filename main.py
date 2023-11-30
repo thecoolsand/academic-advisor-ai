@@ -11,7 +11,7 @@ from langchain.prompts import PromptTemplate
 # response = requests.get(url)
 
 # ---CONSTANTS----
-OPEN_AI_API_KEY = "YOUR_API_KEY_HERE"
+OPEN_AI_API_KEY = "YOUR_API_KEY"
 
 # ---CONSTANTS----
 
@@ -19,7 +19,7 @@ q_a_dict_student = {}
 
 template = """Question: {question}
 
-Answer: Let's think step by step."""
+Answer: Simply return the latest asked data and skip any intermediary steps required."""
 
 prompt = PromptTemplate(template=template, input_variables=["question"])
 llm = OpenAI(api_key=OPEN_AI_API_KEY, max_tokens=1500)
@@ -65,16 +65,13 @@ def home():
                 else:
                     for j in text_chunks:
                         questions_student.append(j)
-            if subject == "Physics":
-                    pass
             for i in questions_student:
                 q_a_dict_student[i] = answers_student[questions_student.index(i)]
-            print(llm_chain.run(f"Grade these answers to their respective questions one by one (check with reference "
-                                f"to CBSE Class 9 Physics syllabus) with a little leniency and assign each one of "
+        st.write(llm_chain.run(f"Grade these answers to their respective questions one by one (check with reference "
+                                f"to CBSE Class 9 {subject} syllabus) with a little leniency and assign each one of "
                                 f"them a percentage based on how correct they are and format the whole data along "
-                                f"with the explanation of grades into a convenient JSON format: {q_a_dict_student}"))
-
-        st.write(q_a_dict_student)
+                                f"with the explanation of grades into a convenient JSON format (return ONLY the JSON "
+                               f"data): {q_a_dict_student}"))
 
 
 if __name__ == "__main__":
