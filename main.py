@@ -14,7 +14,7 @@ from langchain.prompts import PromptTemplate
 #answers_student: Contains list of all answers
 
 # ---CONSTANTS----
-OPEN_AI_API_KEY = "YOUR_API_KEY_HERE"
+OPEN_AI_API_KEY = st.secrets["open_ai_key"]
 # ---CONSTANTS----
 
 q_a_dict_student = {}
