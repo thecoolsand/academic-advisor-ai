@@ -1,4 +1,4 @@
-# Academic Advisor AI
+# [Academic Advisor AI](https://academic-advisor-ai.streamlit.app/)
 
 ---
 ### _Download and set up_
