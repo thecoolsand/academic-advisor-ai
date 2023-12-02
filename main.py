@@ -63,6 +63,7 @@ def home():
                 answers_student = []
                 for i in raw_text:
                     text_chunks = re.split('\d+' + "." + " ", i)
+                    # string_name.replace('\d+' + "." + " ", " ")
                     text_chunks.pop(0)
                     # print(text_chunks)
                     if raw_text.index(i) == 0:
@@ -73,23 +74,25 @@ def home():
                             questions_student.append(j)
                 for i in questions_student:
                     q_a_dict_student[i] = answers_student[questions_student.index(i)]
-            percentage_dict = json.loads(llm_chain.run(f"Give me an accurate percentage along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the CBSE class 9 {subject} syllabus) and make the data into a JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Make the 'percentage' and the 'explanation' two different properties: {q_a_dict_student}"))
+            percentage_dict = json.loads(json.dumps(llm_chain.run(f"Give me a very accurate percentage along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the CBSE class 9 {subject} syllabus) and make the data into a JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Make the 'percentage' and the 'explanation' two different properties: {q_a_dict_student}")))
             print(percentage_dict)
             print(type(percentage_dict))
             # percentage_dict = {"What are the fundamental differences between scalar and vector quantities?": { "percentage": 75, "reason": "The answer accurately explains the fundamental differences between scalar and vector quantities with a suitable example." }, "Explain the three laws of motion formulated by Sir Isaac Newton.": { "percentage": 0, "reason": "The answer is incomplete." }, "Define and differentiate between gravitational force and electrostatic force.": { "percentage": 75, "reason": "The answer accurately defines and differentiates between gravitational force and electrostatic force." }, "Describe the concept of work and its relation to energy.": { "percentage": 75, "reason": "The answer accurately describes the concept of work and its relation to energy." }, "Explain the term 'refraction of light' and provide examples from daily life.": { "percentage": 75, "reason": "The answer accurately explains the term 'refraction of light' and provides examples from daily life." }, "Elaborate on the difference between series and parallel circuits.": { "percentage": 75, "reason": "The answer accurately elaborates on the difference between series and parallel circuits." }, "Define sound waves and their propagation through different mediums.": { "percentage": 75, "reason": "The answer accurately defines sound waves and their propagation through different mediums." }, "What is the role of a concave lens in optical devices?": { "percentage": 75, "reason": "The answer accurately explains the role of a concave lens in optical devices." }, "Discuss the effects of force on an object's motion with suitable examples.": { "percentage": 75, "reason": "The answer accurately discusses the effects of force on an object's motion with a suitable example." }, "Explain the laws of reflection of light using a mirror as an example.": { "percentage": 75, "reason": "The answer accurately explains the laws of reflection of light using a mirror as an example." } }
-            st.write(percentage_dict)
+            st.write(json.loads(percentage_dict))
             percentage_list = []
             explanation_list = []
+            print(json.loads(percentage_dict))
 
             for i in questions_student:
-                for j in percentage_dict:
+                for j in json.loads(percentage_dict):
                     if i.strip() == j:
                         try:
-                            percentage_list.append(percentage_dict[j]["percentage"])
-                            explanation_list.append(percentage_dict[j]["explanation"])
+                            percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
+                            explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
+                            print(percentage_list)
                         except KeyError:
-                            percentage_list.append(percentage_dict[j]["Percentage"])
-                            explanation_list.append(percentage_dict[j]["Explanation"])
+                            percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
+                            explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
             st.write(percentage_list, explanation_list)
             print(percentage_list, explanation_list)
         except TypeError:
