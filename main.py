@@ -87,7 +87,7 @@ def write_counter(file_name):
     f.close()
 
 # ---CONSTANTS----
-OPEN_AI_API_KEY = "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"
+OPEN_AI_API_KEY = st.secrets["open_ai_api"]
 # ---CONSTANTS----
 
 q_a_dict_student = {}
