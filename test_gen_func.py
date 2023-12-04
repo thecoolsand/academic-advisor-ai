@@ -10,9 +10,11 @@ import random
 
 # FUNCTIONS USED
 def last_word(word: str) -> list[str]:
-    for i in range(len(word)):
-        if word[-i] == " " and word[-i + 1] != " ":
-            return [word[0:len(word) - i], word.strip(" ")[-1]]
+    sentence_list = [i+" " for i in word.split(" ")]
+    last_word = sentence_list[len(sentence_list)-1].strip()
+    sentence_list.pop(len(sentence_list)-1)
+    rest_sentence = "".join(sentence_list)
+    return [last_word, rest_sentence]
 
 
 def check(questions: str):
@@ -24,8 +26,8 @@ def check(questions: str):
     return dummy
 
 
-def change_percent(percent: list, subject: str, order: list, p: dict) -> None:
-    s = SUBJECTS.get(subject)
+def change_percent(percent: list, subject: list, order: list, p: dict) -> None:
+    s = subject
     dummy = [[s[i], 0, 0] for i in range(len(s))]  # first zero is question numbers and second zero is number wrong
     # count
     for i in range(len(percent)):

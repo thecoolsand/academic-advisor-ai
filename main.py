@@ -6,14 +6,15 @@ from langchain.chains import LLMChain
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 import time
-from test_gen_func import sort_with_prev, gen_prompt, check, last_word
+from test_gen_func import sort_with_prev, gen_prompt, check, last_word, change_percent
 import math
 import random
 
 gen_questions_list = []
+#LIS
 prev = {'Motion': 0.00, 'Force': 0.00, 'Gravitation': 0.00, 'Sound': 0.00, 'Work': 0.00}
 prev_topics = []
-
+order = []
 
 def test_eval(key):
 
@@ -27,48 +28,57 @@ def test_eval(key):
                                                                                                         "Technology ("
                                                                                                         "Code 402)"])
     if st.button("Process"):
-        print("processing")
-        try:
-            with st.spinner("Processing..."):
-                raw_text = [i.replace("\n", " ") for i in get_pdf_text(pdf_docs)]
-                questions_student = []
-                answers_student = []
-                for i in raw_text:
-                    text_chunks = [j.strip() for j in re.split('\d+' + "." + " ", i)]
-                    text_chunks.pop(0)
-                    st.write(text_chunks)
-                    if raw_text.index(i) == 0:
-                        for j in text_chunks:
-                            answers_student.append(j)
-                    else:
-                        for j in text_chunks:
-                            j = last_word(j.strip(" "))
-                            questions_student.append(j)
-                for i in questions_student:
-                    q_a_dict_student[i] = answers_student[questions_student.index(i)]
-
-            percentage_dict = json.loads(json.dumps(llm_chain.run(f'''Give me a very accurate percentage along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the Indian CBSE class 9 {subject} syllabus) and make the data into a valid JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Make the "percentage" and the "explanation" two different properties: {q_a_dict_student}''')))
-
-            # percentage_dict = {"What are the fundamental differences between scalar and vector quantities?": { "percentage": 75, "reason": "The answer accurately explains the fundamental differences between scalar and vector quantities with a suitable example." }, "Explain the three laws of motion formulated by Sir Isaac Newton.": { "percentage": 0, "reason": "The answer is incomplete." }, "Define and differentiate between gravitational force and electrostatic force.": { "percentage": 75, "reason": "The answer accurately defines and differentiates between gravitational force and electrostatic force." }, "Describe the concept of work and its relation to energy.": { "percentage": 75, "reason": "The answer accurately describes the concept of work and its relation to energy." }, "Explain the term 'refraction of light' and provide examples from daily life.": { "percentage": 75, "reason": "The answer accurately explains the term 'refraction of light' and provides examples from daily life." }, "Elaborate on the difference between series and parallel circuits.": { "percentage": 75, "reason": "The answer accurately elaborates on the difference between series and parallel circuits." }, "Define sound waves and their propagation through different mediums.": { "percentage": 75, "reason": "The answer accurately defines sound waves and their propagation through different mediums." }, "What is the role of a concave lens in optical devices?": { "percentage": 75, "reason": "The answer accurately explains the role of a concave lens in optical devices." }, "Discuss the effects of force on an object's motion with suitable examples.": { "percentage": 75, "reason": "The answer accurately discusses the effects of force on an object's motion with a suitable example." }, "Explain the laws of reflection of light using a mirror as an example.": { "percentage": 75, "reason": "The answer accurately explains the laws of reflection of light using a mirror as an example." } }
-            st.write(percentage_dict)
-            percentage_list = []
-            explanation_list = []
-
+        # try:
+        with st.spinner("Processing..."):
+            raw_text = [i.replace("\n", " ") for i in get_pdf_text(pdf_docs)]
+            st.write("raw text", raw_text)
+            questions_student = []
+            answers_student = []
+            for i in raw_text:
+                text_chunks = [j.strip() for j in re.split('\d+' + "." + " ", i)]
+                text_chunks.pop(0)
+                st.write("text_chunks", text_chunks)
+                if raw_text.index(i) == 0:
+                    for j in text_chunks:
+                        answers_student.append(j)
+                else:
+                    for j in text_chunks:
+                        st.write("j", j)
+                        j = last_word(j)
+                        # print(j)
+                        # questions_student.append(j[1])
+                        order.append(last_word(j[0][1:-1]))
+            print(questions_student)
+            st.write("questions_student", questions_student)
+            st.write("answers_student", answers_student)
+            print(answers_student)
             for i in questions_student:
-                for j in json.loads(percentage_dict):
-                    if i.strip() == j:
-                        try:
-                            percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
-                            explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
-                        except KeyError:
-                            percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
-                            explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
-            st.write(percentage_list, explanation_list)
-            st.session_state.topic_prompt = ""
+                q_a_dict_student[i] = answers_student[questions_student.index(i)]
 
-        except TypeError:
-            response = "<span style='color:red'>Please input 2 pdf files as question and answer pdfs, separately (Question 1st, Answer 2nd)</span>"
-            st.markdown(response, unsafe_allow_html=True)
+        percentage_dict = json.loads(json.dumps(llm_chain.run(f'''Give me a percentage based on the gradation of the answers on how accurate they are along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the Indian CBSE class 9 {subject} syllabus) and make the data into a valid JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Make the "percentage" and the "explanation" two different properties: {q_a_dict_student}''')))
+
+        # percentage_dict = {"What are the fundamental differences between scalar and vector quantities?": { "percentage": 75, "reason": "The answer accurately explains the fundamental differences between scalar and vector quantities with a suitable example." }, "Explain the three laws of motion formulated by Sir Isaac Newton.": { "percentage": 0, "reason": "The answer is incomplete." }, "Define and differentiate between gravitational force and electrostatic force.": { "percentage": 75, "reason": "The answer accurately defines and differentiates between gravitational force and electrostatic force." }, "Describe the concept of work and its relation to energy.": { "percentage": 75, "reason": "The answer accurately describes the concept of work and its relation to energy." }, "Explain the term 'refraction of light' and provide examples from daily life.": { "percentage": 75, "reason": "The answer accurately explains the term 'refraction of light' and provides examples from daily life." }, "Elaborate on the difference between series and parallel circuits.": { "percentage": 75, "reason": "The answer accurately elaborates on the difference between series and parallel circuits." }, "Define sound waves and their propagation through different mediums.": { "percentage": 75, "reason": "The answer accurately defines sound waves and their propagation through different mediums." }, "What is the role of a concave lens in optical devices?": { "percentage": 75, "reason": "The answer accurately explains the role of a concave lens in optical devices." }, "Discuss the effects of force on an object's motion with suitable examples.": { "percentage": 75, "reason": "The answer accurately discusses the effects of force on an object's motion with a suitable example." }, "Explain the laws of reflection of light using a mirror as an example.": { "percentage": 75, "reason": "The answer accurately explains the laws of reflection of light using a mirror as an example." } }
+        st.write(percentage_dict)
+        percentage_list = []
+        explanation_list = []
+
+        for i in questions_student:
+            for j in json.loads(percentage_dict):
+                if i.strip() == j:
+                    try:
+                        percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
+                        explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
+                    except KeyError:
+                        percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
+                        explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
+        st.write(percentage_list, explanation_list)
+        change_percent(percent=percentage_list, subject=subjects_dict.get(subject), order=order, p=prev)
+        st.session_state.topic_prompt = ""
+
+        # except TypeError as e:
+        #     print(e)
+        #     response = "<span style='color:red'>Please input 2 pdf files as question and answer pdfs, separately (Question 1st, Answer 2nd)</span>"
+        #     st.markdown(response, unsafe_allow_html=True)
 
 
 def test_gen():
@@ -140,7 +150,7 @@ def get_pdf_text(pdf_docs):
 
 
 # ---CONSTANTS----
-OPEN_AI_API_KEY = "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"
+OPEN_AI_API_KEY = "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"
 # ---CONSTANTS----
 
 # AI configuration
