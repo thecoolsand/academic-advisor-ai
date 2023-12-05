@@ -1,12 +1,4 @@
-import streamlit as st
-from PyPDF2 import PdfReader
-import re
-import json
-from langchain.chains import LLMChain
-from langchain.llms import OpenAI
-from langchain.prompts import PromptTemplate
-import time
-import random
+
 
 # FUNCTIONS USED
 def last_word(word: str) -> list[str]:
@@ -29,14 +21,14 @@ def check(questions: str):
 def change_percent(percent: list, subject: list, order: list, p: dict) -> None:
     s = subject
     dummy = [[s[i], 0, 0] for i in range(len(s))]  # first zero is question numbers and second zero is number wrong
-    # count
-    for i in range(len(percent)):
-        dummy[s.index(order[i])][1] = dummy[s.index(order[i])][1] + 1
-
     # check
     for i in range(len(dummy)):
         if percent[i] <= 80:
-            dummy[dummy.index([order[i], 0, 0])][2] = dummy[dummy.index([order[i], 0, 0])][2] + 1
+            dummy[s.index(order[i][0])][2] = dummy[s.index(order[i][0])][2] + 1
+
+    # count
+    for i in range(len(percent)):
+        dummy[s.index(order[i][0])][1] = dummy[s.index(order[i][0])][1] + 1
 
     # change
     for i in range(len(dummy)):
@@ -68,51 +60,4 @@ SUBJECTS = {'Physics': ['Motion', 'Force', 'Gravitation', 'Sound', 'Work']}
 prev = {'Motion': 0.00, 'Force': 0.00, 'Gravitation': 0.00, 'Sound': 0.00, 'Work': 0.00}
 prev_topics = []
 order = []
-
-#main func
-
-def test_gen(key):
-    ques_tot = st.radio(label="Number of questions", options=[10, 20, 30, 40])
-    if st.button("Generate test"):
-        with st.spinner("Processing..."):
-            questions_student = []
-            topics = SUBJECTS.get(subject)
-            topics = sort_with_prev(topics, p=prev)
-            ques = ques_tot // len(topics)
-            for i in topics:
-                if i != topics[len(topics) - 1]:
-                    ques += math.floor(ques * prev.get(i))  # NOQA
-                    ques_tot -= ques
-                    LIS.append(ques)
-                else:
-                    LIS.append(ques_tot)
-
-        if LIS[-1] > LIS[-2]:
-            LIS[-1], LIS[-2] = LIS[-2], LIS[-1]
-        for i in range(len(topics)):
-            for j in range(LIS[i]):
-                prev_topics.append(topics[i])
-
-        ques, a = [], ''
-        questions_student.append(llm_chain.run(gen_prompt(topics=topics)))
-        st.write(questions_student)
-        place = check(questions_student[0])
-        for i in place:
-            for j in range(1, 100000):
-                try:
-                    if questions_student[0][i + j] != '\n':
-                        a = a + questions_student[0][i + j]
-                    elif questions_student[0][i + j] == '\n':
-                        ques.append([a.strip(), prev_topics[place.index(i)]])
-                        a = ''
-                        break
-                except IndexError:
-                    ques.append([a.strip(), prev_topics[place.index(i)]])
-                    a = ''
-                    break
-                
-        for k in range(len(ques)):
-            d = random.choice(ques)
-            st.write(f"{k + 1}. {d[0]} ({d[1]})")
-            del ques[ques.index(d)]
             
