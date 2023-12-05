@@ -9,6 +9,7 @@ import time
 from test_gen_func import sort_with_prev, gen_prompt, check, last_word, change_percent
 import math
 import random
+from pprint import pprint
 # import aspose
 
 
@@ -26,83 +27,82 @@ def test_eval(key):
     with st.sidebar:
         st.subheader("Your documents")
         pdf_docs = st.file_uploader("Upload your PDFs here and click on 'Process'", accept_multiple_files=True, key=key)
-        print(pdf_docs)
     subject = st.radio(label="Choose your subject", options=["Physics", "Chemistry", "Biology", "Artificial "
                                                                                                 "Intelligence (Code "
                                                                                                 "417)", "Information "
                                                                                                         "Technology ("
                                                                                                         "Code 402)"])
     if st.button("Process"):
+        # try:
+        with st.spinner("Processing..."):
+            raw_text = [i.replace("\n", " ") for i in get_pdf_text(pdf_docs)]
+            st.write("raw text", raw_text)
+            questions_student = []
+            answers_student = []
+            for i in raw_text:
+                text_chunks = [j.strip() for j in re.split('\d+' + "." + " ", i)]
+                text_chunks.pop(0)
+                st.write("text_chunks", text_chunks)
+                if raw_text.index(i) == 0:
+                    for j in text_chunks:
+
+                        j = last_word(j.strip())
+                        # print(j)
+                        questions_student.append(j[1])
+                        order.append(last_word(j[0][1:-1]))
+                else:
+                    for j in text_chunks:
+                        answers_student.append(j)
+
+            questions_student = [i.strip() for i in questions_student]
+            st.write("questions_student", questions_student)
+            st.write("answers_student", answers_student)
+            for i in questions_student:
+                q_a_dict_student[i] = answers_student[questions_student.index(i)]
         try:
-            with st.spinner("Processing..."):
-                raw_text = [i.replace("\n", " ") for i in get_pdf_text(pdf_docs)]
-                st.write("raw text", raw_text)
-                questions_student = []
-                answers_student = []
-                for i in raw_text:
-                    text_chunks = [j.strip() for j in re.split('\d+' + "." + " ", i)]
-                    text_chunks.pop(0)
-                    st.write("text_chunks", text_chunks)
-                    if raw_text.index(i) == 0:
-                        for j in text_chunks:
+            percentage_dict = json.loads(json.dumps(llm_chain.run(f'''Give me a percentage based on the gradation of the answers on how accurate they are along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the Indian CBSE class 9 {subject} syllabus) and format the data into a valid JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Use double quotes instead of single quotes. Make the "percentage" and the "explanation" two different properties: {q_a_dict_student}'''))).split("\n\n")[1]
+        except IndexError:
+            percentage_dict = json.loads(json.dumps(llm_chain.run(f'''Give me a percentage based on the gradation of the answers on how accurate they are along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the Indian CBSE class 9 {subject} syllabus) and format the data into a valid JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Use double quotes instead of single quotes. Make the "percentage" and the "explanation" two different properties: {q_a_dict_student}''')))
+        # percentage_dict = {"Explain what is meant by the term frequency in relation to sound.": { "percentage": 75, "reason": "The answer accurately explains the fundamental differences between scalar and vector quantities with a suitable example." }, "Describe the process of sound propagation in different media.": { "percentage": 0, "reason": "The answer is incomplete." }, "Explain how work is done by an object when it is moved through a distance.": { "percentage": 75, "reason": "The answer accurately defines and differentiates between gravitational force and electrostatic force." }, "Describe the importance of gravity for the formation and stability of the solar system.": { "percentage": 75, "reason": "The answer accurately describes the concept of work and its relation to energy." }, "Describe the different types of forces and how they can interact with each other.": { "percentage": 75, "reason": "The answer accurately explains the term 'refraction of light' and provides examples from daily life." }, "Explain the concept of a force and how it can cause objects to accelerate.": { "percentage": 75, "reason": "The answer accurately elaborates on the difference between series and parallel circuits." } }
+        st.write(percentage_dict)
+        print("percentage dict", repr(percentage_dict))
+        percentage_list = []
+        explanation_list = []
+        try:
+            for i in questions_student:
+                for j in json.loads(percentage_dict):
+                    if i.strip() == j:
 
-                            j = last_word(j.strip())
-                            # print(j)
-                            questions_student.append(j[1])
-                            order.append(last_word(j[0][1:-1]))
-                    else:
-                        for j in text_chunks:
-                            answers_student.append(j)
-
-                questions_student = [i.strip() for i in questions_student]
-                print(questions_student)
-                st.write("questions_student", questions_student)
-                st.write("answers_student", answers_student)
-                print(answers_student)
-                for i in questions_student:
-                    q_a_dict_student[i] = answers_student[questions_student.index(i)]
-
-            percentage_dict = json.loads(json.dumps(llm_chain.run(f'''Give me a percentage based on the gradation of the answers on how accurate they are along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the Indian CBSE class 9 {subject} syllabus) and format the data into a valid JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Make the "percentage" and the "explanation" two different properties: {q_a_dict_student}'''))).split("\n\n")[1]
-            # percentage_dict = {"Explain what is meant by the term frequency in relation to sound.": { "percentage": 75, "reason": "The answer accurately explains the fundamental differences between scalar and vector quantities with a suitable example." }, "Describe the process of sound propagation in different media.": { "percentage": 0, "reason": "The answer is incomplete." }, "Explain how work is done by an object when it is moved through a distance.": { "percentage": 75, "reason": "The answer accurately defines and differentiates between gravitational force and electrostatic force." }, "Describe the importance of gravity for the formation and stability of the solar system.": { "percentage": 75, "reason": "The answer accurately describes the concept of work and its relation to energy." }, "Describe the different types of forces and how they can interact with each other.": { "percentage": 75, "reason": "The answer accurately explains the term 'refraction of light' and provides examples from daily life." }, "Explain the concept of a force and how it can cause objects to accelerate.": { "percentage": 75, "reason": "The answer accurately elaborates on the difference between series and parallel circuits." } }
-            st.write(percentage_dict)
-            print("percentage dict", repr(percentage_dict))
-            percentage_list = []
-            explanation_list = []
-            try:
-                for i in questions_student:
-                    for j in json.loads(percentage_dict):
-                        if i.strip() == j:
-
-                            try:
-                                percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
-                                explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
-                            except KeyError:
-                                percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
-                                explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
-                st.write(percentage_list, explanation_list)
-                change_percent(percent=percentage_list, subject=subjects_dict.get(subject), order=order, p=prev)
-                st.session_state.messages.append()
-                st.session_state.topic_prompt = ""
-            except ValueError as e:
-                print(e)
-                percentage_dict = percentage_dict.strip("Formatted JSON Object: ")[1]
-                for i in questions_student:
-                    for j in json.loads(percentage_dict):
-                        if i.strip() == j:
-                            try:
-                                percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
-                                explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
-                            except KeyError:
-                                percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
-                                explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
-                st.write(percentage_list, explanation_list)
-                change_percent(percent=percentage_list, subject=subjects_dict.get(subject), order=order, p=prev)
-                st.session_state.messages.append(percentage_dict)
-                st.session_state.topic_prompt = ""
-        except TypeError as e:
+                        try:
+                            percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
+                            explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
+                        except KeyError:
+                            percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
+                            explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
+            st.write(percentage_list, explanation_list)
+            change_percent(percent=percentage_list, subject=subjects_dict.get(subject), order=order, p=prev)
+            st.session_state.messages.append(st.session_state.messages.append({"role": "assistant", "content": percentage_dict}))
+            st.session_state.topic_prompt = ""
+        except ValueError as e:
             print(e)
-            response = "<span style='color:red'>Please input 2 pdf files as question and answer pdfs, separately (Question 1st, Answer 2nd)</span>"
-            st.markdown(response, unsafe_allow_html=True)
+            percentage_dict = percentage_dict.strip("Formatted JSON Object: ")[1]
+            for i in questions_student:
+                for j in json.loads(percentage_dict):
+                    if i.strip() == j:
+                        try:
+                            percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
+                            explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
+                        except KeyError:
+                            percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
+                            explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
+            st.write(percentage_list, explanation_list)
+            change_percent(percent=percentage_list, subject=subjects_dict.get(subject), order=order, p=prev)
+            st.session_state.messages.append(percentage_dict)
+            st.session_state.topic_prompt = ""
+    # except TypeError as e:
+    #     print(e)
+    #     response = "<span style='color:red'>Please input 2 pdf files as question and answer pdfs, separately (Question 1st, Answer 2nd)</span>"
+    #     st.markdown(response, unsafe_allow_html=True)
 
 
 def test_gen():
@@ -179,7 +179,7 @@ def get_pdf_text(pdf_docs):
 
 
 # ---CONSTANTS----
-OPEN_AI_API_KEY = st.secrets["open_ai_api"]
+OPEN_AI_API_KEY = "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"
 # ---CONSTANTS----
 
 # AI configuration
@@ -189,7 +189,7 @@ subjects_dict = {'Physics': ['Motion', 'Force', 'Gravitation', 'Sound', 'Work']}
 
 template = """Question: {question}
 
-Answer: Simply return the asked data and maintain specifications and skip any intermediary steps required. Make sure to give all requirements the same priority and make sure all of them are fulfilled. Make sure the formatting is in valid JSON"""
+Answer: Simply return the asked data and maintain specifications and skip any intermediary steps required. Make sure to give all requirements the same priority and make sure all of them are fulfilled. Make sure the formatting is valid JSON"""
 
 prompt = PromptTemplate(template=template, input_variables=["question"])
 llm = OpenAI(api_key=OPEN_AI_API_KEY, max_tokens=1500)
@@ -238,8 +238,11 @@ def home():
 
     # Display chat messages from history on app rerun
     for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+        try:
+            with st.chat_message(message['role']):
+                st.markdown(message['content'])
+        except TypeError:
+            pass
 
     if st.session_state.greeting_count == 0:
         with st.chat_message("assistant"):

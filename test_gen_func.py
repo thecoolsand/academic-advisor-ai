@@ -22,9 +22,14 @@ def change_percent(percent: list, subject: list, order: list, p: dict) -> None:
     s = subject
     dummy = [[s[i], 0, 0] for i in range(len(s))]  # first zero is question numbers and second zero is number wrong
     # check
-    for i in range(len(dummy)):
-        if percent[i] <= 80:
-            dummy[s.index(order[i][0])][2] = dummy[s.index(order[i][0])][2] + 1
+    try:
+        for i in range(len(dummy)):
+            if percent[i] <= 80:
+                dummy[s.index(order[i][0])][2] = dummy[s.index(order[i][0])][2] + 1
+    except TypeError:
+        for i in range(len(dummy)):
+            if int(percent[i].strip("%")) <= 80:
+                dummy[s.index(order[i][0])][2] = dummy[s.index(order[i][0])][2] + 1
 
     # count
     for i in range(len(percent)):
