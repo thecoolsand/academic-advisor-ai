@@ -14,7 +14,7 @@ This repository is made for students, who want to self learn with the help of AI
 evaluate tests and course plans according to student's needs. This can also be used by teachers in creating tests for classes.
 
 ## Generate Tests
-After login, this is one of the three options avalible to the user. 
+After login, this is one of the three options available to the user. 
 When clicked will ask for the desired subject and on which topics of that subject. 
 Also it will ask for the number of questions to be asked. 
 Then it will generate a test in a word file.

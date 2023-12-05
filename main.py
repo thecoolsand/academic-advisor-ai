@@ -179,7 +179,7 @@ def get_pdf_text(pdf_docs):
 
 
 # ---CONSTANTS----
-OPEN_AI_API_KEY = "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"
+OPEN_AI_API_KEY = st.secrets["open_ai_api"]
 # ---CONSTANTS----
 
 # AI configuration
