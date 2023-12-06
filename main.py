@@ -159,7 +159,7 @@ def test_gen():
         for k in range(len(ques)):
             d = random.choice(ques)
             full_response += f"{k + 1}. {d[0]} ({d[1]})\n"
-            # st.write(f"{k+1}. {d[0]} ({d[1]})")
+            st.write(f"{k+1}. {d[0]} ({d[1]})")
             del ques[ques.index(d)]
         st.session_state.topic_prompt = ""
         st.session_state.messages.append({"role": "assistant", "content": full_response})
@@ -183,7 +183,7 @@ def get_pdf_text(pdf_docs):
 
 
 # ---CONSTANTS----
-OPEN_AI_API_KEY = "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"
+OPEN_AI_API_KEY = st.secrets["open_ai_key"]
 # ---CONSTANTS----
 
 # AI configuration
