@@ -107,11 +107,7 @@ def test_eval(key):
 
 def test_gen():
     global subject, prev, prev_topics, gen_questions_list
-    subject = st.radio(label="Choose your subject", options=["Physics", "Chemistry", "Biology", "Artificial "
-                                                                                                "Intelligence (Code "
-                                                                                                "417)", "Information "
-                                                                                                        "Technology ("
-                                                                                                        "Code 402)"])
+    subject = st.radio(label="Choose your subject", options=["Physics", "Chemistry", "Biology"])
     ques_tot = st.radio(label="Number of questions", options=[10, 20, 30, 40])
 
     if st.button("Generate test"):
@@ -179,7 +175,7 @@ def get_pdf_text(pdf_docs):
 
 
 # ---CONSTANTS----
-OPEN_AI_API_KEY = st.secrets["open_ai_api"]
+OPEN_AI_API_KEY = "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"
 # ---CONSTANTS----
 
 # AI configuration
