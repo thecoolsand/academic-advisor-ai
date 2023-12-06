@@ -1,3 +1,18 @@
+import streamlit as st
+from langchain.chains import LLMChain
+from langchain.llms import OpenAI
+from langchain.prompts import PromptTemplate
+
+OPEN_AI_API_KEY = st.secrets["open_ai_key"]
+
+template = """Question: {question}
+
+Answer: Simply return the asked data and maintain specifications and skip any intermediary steps required. Make sure to give all requirements the same priority and make sure all of them are fulfilled. Make sure the formatting is valid JSON"""
+
+
+prompt = PromptTemplate(template=template, input_variables=["question"])
+llm = OpenAI(api_key=OPEN_AI_API_KEY, max_tokens=1500)
+llm_chain = LLMChain(prompt=prompt, llm=llm)
 # FUNCTIONS USED
 def remove_space(thing: list) -> list:
     for i in range(len(thing[0])):
@@ -63,6 +78,26 @@ def sort_with_prev(L: list, p: dict) -> list:
     L = [a[i][1] for i in range(len(a))]
     return L
 
+
+def recommendation(p: dict, topics: list, subject: str) -> str:
+    with st.spinner("Generating..."):
+        a = ''
+
+        for i in range(len(topics)):
+            if p.get(topics[i]) > 0.50:
+                a += f"{topics[i]}, "
+        if a != '':
+            response = llm_chain.run(f"Recommend non copyright resources for students who are not proficient in Class 9 CBSE {subject} Syllabus in only the following topics: {a}")
+        else:
+            dummy = [[p.get(topics[i]), topics[i]] for i in range(len(topics))]
+            dummy.sort(reverse=True)
+            for i in range(3):
+                a += dummy[i][1] + ', '
+
+            response = llm_chain.run(
+                f"Recommend non copyright resources for students who are not proficient in Class 9 CBSE {subject} Syllabus in only the following topics: {a}")
+
+        return response
 # Variables needed
 LIS = []
 SUBJECTS = {'Physics': ['Motion', 'Force', 'Gravitation', 'Sound', 'Work']}

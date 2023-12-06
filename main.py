@@ -6,7 +6,7 @@ from langchain.chains import LLMChain
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 import time
-from test_gen_func import sort_with_prev, gen_prompt, check, last_word, change_percent, remove_space
+from test_gen_func import sort_with_prev, gen_prompt, check, last_word, change_percent, remove_space, recommendation
 import math
 import random
 
@@ -28,15 +28,15 @@ def test_eval(key):
         pdf_docs = st.file_uploader("Upload your PDFs here and click on 'Process'", accept_multiple_files=True, key=key)
     subject = st.radio(label="Choose your subject", options=["Physics", "Chemistry", "Biology"])
     if st.button("Process"):
-        try:
-            with st.spinner("Processing..."):
+        with st.spinner("Processing..."):
+            try:
+
                 raw_text = [i.replace("\n", " ") for i in get_pdf_text(pdf_docs)]
                 questions_student = []
                 answers_student = []
                 for i in raw_text:
                     text_chunks = [j.strip() for j in re.split('\d+' + "." + " ", i)]
                     text_chunks.pop(0)
-                    st.write("text_chunks", text_chunks)
                     if raw_text.index(i) == 0:
                         for j in text_chunks:
                             j = last_word(j.strip())
@@ -49,65 +49,71 @@ def test_eval(key):
                 questions_student = [i.strip() for i in questions_student]
                 for i in questions_student:
                     q_a_dict_student[i] = answers_student[questions_student.index(i)]
-            try:
-                percentage_dict = json.loads(json.dumps(llm_chain.run(
-                    f'''Give me a percentage based on the gradation of the answers on how accurate they are along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the Indian CBSE class 9 {subject} syllabus) and format the data into a valid JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Use double quotes every single time instead of single quotes. Make the "percentage" and the "explanation" two different properties: {q_a_dict_student}'''))).split(
-                    "\n\n")[1]
-            except IndexError:
-                percentage_dict = json.loads(json.dumps(llm_chain.run(
-                    f'''Give me a percentage based on the gradation of the answers on how accurate they are along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the Indian CBSE class 9 {subject} syllabus) and format the data into a valid JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Use double quotes every single time instead of single quotes. Make the "percentage" and the "explanation" two different properties: {q_a_dict_student}''')))
-            # percentage_dict = {"Explain what is meant by the term frequency in relation to sound.": { "percentage": 75, "reason": "The answer accurately explains the fundamental differences between scalar and vector quantities with a suitable example." }, "Describe the process of sound propagation in different media.": { "percentage": 0, "reason": "The answer is incomplete." }, "Explain how work is done by an object when it is moved through a distance.": { "percentage": 75, "reason": "The answer accurately defines and differentiates between gravitational force and electrostatic force." }, "Describe the importance of gravity for the formation and stability of the solar system.": { "percentage": 75, "reason": "The answer accurately describes the concept of work and its relation to energy." }, "Describe the different types of forces and how they can interact with each other.": { "percentage": 75, "reason": "The answer accurately explains the term 'refraction of light' and provides examples from daily life." }, "Explain the concept of a force and how it can cause objects to accelerate.": { "percentage": 75, "reason": "The answer accurately elaborates on the difference between series and parallel circuits." } }
-            print("percentage dict", repr(percentage_dict))
-            percentage_list = []
-            explanation_list = []
-            try:
-                for i in questions_student:
-                    for j in json.loads(percentage_dict):
-                        if i.strip() == j:
-
-                            try:
-                                percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
-                                explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
-                            except KeyError:
-                                percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
-                                explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
-            except ValueError as e:
-                print(e)
-                percentage_dict = percentage_dict.strip("Formatted JSON Object: ")[1]
+                try:
+                    percentage_dict = json.loads(json.dumps(llm_chain.run(
+                        f'''Give me a percentage based on the gradation of the answers on how accurate they are along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the Indian CBSE class 9 {subject} syllabus) and format the data into a valid JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Use double quotes every single time instead of single quotes. Make the "percentage" and the "explanation" two different properties: {q_a_dict_student}'''))).split(
+                        "\n\n")[1]
+                except IndexError:
+                    percentage_dict = json.loads(json.dumps(llm_chain.run(
+                        f'''Give me a percentage based on the gradation of the answers on how accurate they are along with an elaborate reason for each percentage based on the grade of these answers to their respective questions one by one (according to the Indian CBSE class 9 {subject} syllabus) and format the data into a valid JSON object and make sure the same formatting is followed in every subsequent request in this conversation chain. Use double quotes every single time instead of single quotes. Make the "percentage" and the "explanation" two different properties: {q_a_dict_student}''')))
+                # percentage_dict = {"Explain what is meant by the term frequency in relation to sound.": { "percentage": 75, "reason": "The answer accurately explains the fundamental differences between scalar and vector quantities with a suitable example." }, "Describe the process of sound propagation in different media.": { "percentage": 0, "reason": "The answer is incomplete." }, "Explain how work is done by an object when it is moved through a distance.": { "percentage": 75, "reason": "The answer accurately defines and differentiates between gravitational force and electrostatic force." }, "Describe the importance of gravity for the formation and stability of the solar system.": { "percentage": 75, "reason": "The answer accurately describes the concept of work and its relation to energy." }, "Describe the different types of forces and how they can interact with each other.": { "percentage": 75, "reason": "The answer accurately explains the term 'refraction of light' and provides examples from daily life." }, "Explain the concept of a force and how it can cause objects to accelerate.": { "percentage": 75, "reason": "The answer accurately elaborates on the difference between series and parallel circuits." } }
+                print("percentage dict", repr(percentage_dict))
+                percentage_list = []
+                explanation_list = []
                 try:
                     for i in questions_student:
                         for j in json.loads(percentage_dict):
                             if i.strip() == j:
+
                                 try:
                                     percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
                                     explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
                                 except KeyError:
                                     percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
                                     explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
-                except ValueError as a:
-                    print(a)
+                except ValueError as e:
+                    print(e)
+                    percentage_dict = percentage_dict.strip("Formatted JSON Object: ")[1]
+                    try:
+                        for i in questions_student:
+                            for j in json.loads(percentage_dict):
+                                if i.strip() == j:
+                                    try:
+                                        percentage_list.append(json.loads(percentage_dict)[j]["percentage"])
+                                        explanation_list.append(json.loads(percentage_dict)[j]["explanation"])
+                                    except KeyError:
+                                        percentage_list.append(json.loads(percentage_dict)[j]["Percentage"])
+                                        explanation_list.append(json.loads(percentage_dict)[j]["Explanation"])
+                    except ValueError as a:
+                        print(a)
+                        for i in questions_student:
+                            for j in json.loads(json.dumps(percentage_dict)):
+                                if i.strip() == j:
+                                    try:
+                                        percentage_list.append(json.loads(json.dumps(percentage_dict))[j]["percentage"])
+                                        explanation_list.append(json.loads(json.dumps(percentage_dict))[j]["explanation"])
+                                    except KeyError:
+                                        percentage_list.append(json.loads(json.dumps(percentage_dict))[j]["Percentage"])
+                                        explanation_list.append(json.loads(json.dumps(percentage_dict))[j]["Explanation"])
+
+                response = ""
+                st.write("percentage list", percentage_list)
+                st.write("explanation list", explanation_list)
+                if questions_student[0][-1] == "%":
                     for i in questions_student:
-                        for j in json.loads(json.dumps(percentage_dict)):
-                            if i.strip() == j:
-                                try:
-                                    percentage_list.append(json.loads(json.dumps(percentage_dict))[j]["percentage"])
-                                    explanation_list.append(json.loads(json.dumps(percentage_dict))[j]["explanation"])
-                                except KeyError:
-                                    percentage_list.append(json.loads(json.dumps(percentage_dict))[j]["Percentage"])
-                                    explanation_list.append(json.loads(json.dumps(percentage_dict))[j]["Explanation"])
+                        response += f"{questions_student.index(i) + 1}. {percentage_list[questions_student.index(i)]}; {explanation_list[questions_student.index(i)]}\n"
+                else:
+                    for i in questions_student:
+                        response += f"{questions_student.index(i) + 1}. {percentage_list[questions_student.index(i)]}%; {explanation_list[questions_student.index(i)]}\n"
+                st.markdown(response)
+                change_percent(percent=percentage_list, subject=subjects_dict.get(subject), order=order, p=prev)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.session_state.topic_prompt = ""
 
-            response = ""
-            for i in questions_student:
-                response += f"{questions_student.index(i) + 1} {percentage_list[questions_student.index(i)]}%; {explanation_list[questions_student.index(i)]}"
-            st.markdown(response)
-            change_percent(percent=percentage_list, subject=subjects_dict.get(subject), order=order, p=prev)
-            st.session_state.messages.append(response)
-            st.session_state.topic_prompt = ""
-
-        except TypeError as e:
-            print(e)
-            response = "<span style='color:red'>Please input 2 pdf files as question and answer pdfs, separately (Question 1st, Answer 2nd)</span>"
-            st.markdown(response, unsafe_allow_html=True)
+            except TypeError as e:
+                print(e)
+                response = "<span style='color:red'>Please input 2 pdf files as question and answer pdfs, separately (Question 1st, Answer 2nd)</span>"
+                st.markdown(response, unsafe_allow_html=True)
 
 
 def test_gen():
@@ -129,37 +135,45 @@ def test_gen():
                 else:
                     gen_questions_list.append(ques_tot)
 
-        if gen_questions_list[-1] > gen_questions_list[-2]:
-            gen_questions_list[-1], gen_questions_list[-2] = gen_questions_list[-2], gen_questions_list[-1]
-        for i in range(len(topics)):
-            for j in range(gen_questions_list[i]):
-                prev_topics.append(topics[i])
+            if gen_questions_list[-1] > gen_questions_list[-2]:
+                gen_questions_list[-1], gen_questions_list[-2] = gen_questions_list[-2], gen_questions_list[-1]
+            for i in range(len(topics)):
+                for j in range(gen_questions_list[i]):
+                    prev_topics.append(topics[i])
 
-        ques, a = [], ''
-        questions_student.append(llm_chain.run(gen_prompt(topics=topics, gen_questions_list=gen_questions_list)))
-        questions_student = remove_space(questions_student)
-        place = check(questions_student[0])
-        for i in place:
-            for j in range(1, 100000):
-                try:
-                    if questions_student[0][i + j] != '\n':
-                        a = a + questions_student[0][i + j]
-                    elif questions_student[0][i + j] == '\n':
+            ques, a = [], ''
+            questions_student.append(llm_chain.run(gen_prompt(topics=topics, gen_questions_list=gen_questions_list)))
+            questions_student = remove_space(questions_student)
+            place = check(questions_student[0])
+            for i in place:
+                for j in range(1, 100000):
+                    try:
+                        if questions_student[0][i + j] != '\n':
+                            a = a + questions_student[0][i + j]
+                        elif questions_student[0][i + j] == '\n':
+                            ques.append([a.strip(), prev_topics[place.index(i)]])
+                            a = ''
+                            break
+                    except IndexError:
                         ques.append([a.strip(), prev_topics[place.index(i)]])
                         a = ''
                         break
-                except IndexError:
-                    ques.append([a.strip(), prev_topics[place.index(i)]])
-                    a = ''
-                    break
 
-        # st.write(ques)
-        full_response = ""
-        for k in range(len(ques)):
-            d = random.choice(ques)
-            full_response += f"{k + 1}. {d[0]} ({d[1]})\n"
-            st.write(f"{k+1}. {d[0]} ({d[1]})")
-            del ques[ques.index(d)]
+            # st.write(ques)
+            full_response = ""
+            for k in range(len(ques)):
+                d = random.choice(ques)
+                full_response += f"{k + 1}. {d[0]} ({d[1]})\n"
+                st.write(f"{k+1}. {d[0]} ({d[1]})")
+                del ques[ques.index(d)]
+            st.session_state.topic_prompt = ""
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+def gen_cp():
+    subject = st.radio(label="Choose your subject", options=["Physics", "Chemistry", "Biology"])
+    if st.button("Generate course plan"):
+        full_response = recommendation(p=prev, topics=subjects_dict.get(subject), subject=subject)
+        st.write(full_response)
         st.session_state.topic_prompt = ""
         st.session_state.messages.append({"role": "assistant", "content": full_response})
 
@@ -231,6 +245,10 @@ def home():
         st.chat_input("Type 'how to' to see what's up", disabled=True, key="disabled_chat_widget")
         with st.chat_message("assistant"):
             test_gen()
+    elif st.session_state.topic_prompt == "generate course plan":
+        st.chat_input("Type 'how to' for help", disabled=True, key="disabled_chat_widget")
+        with st.chat_message("assistant"):
+            gen_cp()
 
     if "use_app" not in st.session_state:
         st.session_state.use_app = False
@@ -286,6 +304,9 @@ def home():
                         elif prompt.lower() == "generate test" or prompt.lower() == "gen test":
                             st.session_state.topic_prompt = "generate test"
                             st.experimental_rerun()
+                        elif prompt.lower() == "generate course plan" or prompt.lower() == "gen cp":
+                            st.session_state.topic_prompt = "generate course plan"
+                            st.experimental_rerun()
                     elif prompt.lower() == "how to":
                         assistant_response = """"""
 
@@ -295,10 +316,13 @@ def home():
                     if st.session_state.topic_prompt == "":
                         assistant_response = "Which option would you like to choose? (Evaluate Test, Generate Test, Generate Course Plan)"
                         if prompt.lower() == "evaluate test" or prompt.lower() == "eval test":
-                            st.session_state.topic_prompt = prompt.lower()
+                            st.session_state.topic_prompt = "evaluate test"
                             st.experimental_rerun()
                         elif prompt.lower() == "generate test" or prompt.lower() == "gen test":
                             st.session_state.topic_prompt = "generate test"
+                            st.experimental_rerun()
+                        elif prompt.lower() == "generate course plan" or prompt.lower() == "gen cp":
+                            st.session_state.topic_prompt = "generate course plan"
                             st.experimental_rerun()
 
                     else:
