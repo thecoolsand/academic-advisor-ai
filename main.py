@@ -9,7 +9,6 @@ import time
 from test_gen_func import sort_with_prev, gen_prompt, check, last_word, change_percent, remove_space
 import math
 import random
-import aspose.words as aw
 
 gen_questions_list = []
 # LIS
