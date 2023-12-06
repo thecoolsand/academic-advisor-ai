@@ -1,6 +1,10 @@
-
-
 # FUNCTIONS USED
+def remove_space(thing: list) -> list:
+    for i in range(len(thing[0])):
+        if i != " ":
+            return thing[i:]
+
+
 def last_word(word: str) -> list[str]:
     sentence_list = [i+" " for i in word.split(" ")]
     last_word = sentence_list[len(sentence_list)-1].strip()
