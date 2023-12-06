@@ -219,11 +219,11 @@ def home():
     if "topic_prompt" not in st.session_state:
         st.session_state.topic_prompt = ""
     elif st.session_state.topic_prompt == "evaluate test":
-        st.chat_input("What is up?", disabled=True, key="disabled_chat_widget")
+        st.chat_input("Type 'how to' for help", disabled=True, key="disabled_chat_widget")
         with st.chat_message("assistant"):
             test_eval(key="0")
     elif st.session_state.topic_prompt == "generate test":
-        st.chat_input("What is up?", disabled=True, key="disabled_chat_widget")
+        st.chat_input("Type 'how to' for help", disabled=True, key="disabled_chat_widget")
         with st.chat_message("assistant"):
             test_gen()
 
@@ -264,7 +264,7 @@ def home():
 
     # React to user input
     if st.session_state.topic_prompt == "":
-        if prompt := st.chat_input("What is up?", key="real_chat_widget"):
+        if prompt := st.chat_input("Type 'how to' for help", key="real_chat_widget"):
             # Display user message in chat message container
             st.chat_message("user").markdown(prompt)
             # Add user message to chat history
@@ -276,23 +276,25 @@ def home():
                 if not st.session_state.use_app:
                     if prompt.lower() == "use app":
                         st.session_state.use_app = True
-                        assistant_response = "Which option would you like to choose? (Evaluate Test, Generate Test, Generate Course Plan)"
-                        if prompt.lower() == "evaluate test":
+                        assistant_response = "Which option would you like to choose? (Evaluate Test, Generate Test)"
+                        if prompt.lower() == "evaluate test" or prompt.lower() == "eval test":
                             st.session_state.topic_prompt = "evaluate test"
                             st.experimental_rerun()
-                        elif prompt.lower() == "generate test":
+                        elif prompt.lower() == "generate test" or prompt.lower() == "gen test":
                             st.session_state.topic_prompt = "generate test"
                             st.experimental_rerun()
+                    elif prompt.lower() == "how to":
+                        assistant_response = ""
 
                     else:
                         assistant_response = "Sorry I don't understand"
                 else:
                     if st.session_state.topic_prompt == "":
-                        assistant_response = "Which option would you like to choose? (Evaluate Test, Generate Test, Generate Course Plan)"
-                        if prompt.lower() == "evaluate test":
-                            st.session_state.topic_prompt = prompt.lower()
+                        assistant_response = "Which option would you like to choose? (Evaluate Test, Generate Test)"
+                        if prompt.lower() == "evaluate test" or prompt.lower() == "eval test":
+                            st.session_state.topic_prompt = "evaluate test"
                             st.experimental_rerun()
-                        elif prompt.lower() == "generate test":
+                        elif prompt.lower() == "generate test" or prompt.lower() == "gen test":
                             st.session_state.topic_prompt = "generate test"
                             st.experimental_rerun()
 
@@ -300,14 +302,28 @@ def home():
                         st.experimental_rerun()
 
                 # Simulate stream of response with milliseconds delay
-                for chunk in assistant_response.split():
-                    full_response += chunk + " "
-                    time.sleep(0.05)
-                    # Add a blinking cursor to simulate typing
-                    message_placeholder.markdown(full_response + "▌")
-                message_placeholder.markdown(full_response)
-                # Add assistant response to chat history
-                st.session_state.messages.append({"role": "assistant", "content": full_response})
+                if assistant_response != "":
+                    for chunk in assistant_response.split():
+                        full_response += chunk + " "
+                        time.sleep(0.05)
+                        # Add a blinking cursor to simulate typing
+                        message_placeholder.markdown(full_response + "▌")
+                    message_placeholder.markdown(full_response)
+                    # Add assistant response to chat history
+                    st.session_state.messages.append({"role": "assistant", "content": full_response})
+                else:
+                    response = """
+                    How to use **Eduboost**
+                    1. Type ```use app``` to view options (type ```use app``` after this to reset interaction)
+                    2. *Choose option*: Type ```Evaluate Test``` (or ```eval test```) and upload files (Q and A pdfs separately for processing) ```Generate Test```  (or ```gen test```) and choose no of questions along with subject.
+                    3. Follow the instructions
+                    4. Type ```use app``` again to reset interaction.
+                    ---
+                    We hope you found our guide helpful!
+                  """
+                    message_placeholder.markdown(response)
+                    # Add assistant response to chat history
+                    st.session_state.messages.append({"role": "assistant", "content": response})
 
 
 if __name__ == "__main__":
