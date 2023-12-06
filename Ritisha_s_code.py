@@ -53,17 +53,13 @@ def recommend_books(weaknesses):
 
 
 def main():
-    st.set_page_config(page_title="Eduboost Analyzer", page_icon=":books:")
-    st.title("Eduboost Analyzer :book:")
+    st.set_page_config(page_title="Generate Course Plan", page_icon=":books:")
+    st.title("Generate Course Plan :book:")
 
     with st.sidebar:
         st.subheader("Your documents")
         pdf_docs = st.file_uploader("Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
-    subject = st.radio(label="Choose your subject", options=["Physics", "Chemistry", "Biology", "Artificial "
-                                                                        "Intelligence (Code "
-                                                                        "417)", "Information "
-                                                                                "Technology ("
-                                                                                "Code 402)"])
+    subject = st.radio(label="Choose your subject", options=["Physics", "Chemistry", "Biology"])
 
     if st.button("Process"):
         try:
